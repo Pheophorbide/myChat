@@ -27,11 +27,12 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    height: calc(100vh - 73px - 91px);
   }
 
   &__message {
     color: white;
-    flex-grow: 1;
     padding: 12px;
     max-width: 200px;
     background: #CABDFD;
