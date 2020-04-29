@@ -1,0 +1,10 @@
+.panel {
+  background: white;
+  border-radius: 8px;
+  min-width: 100%;
+  border: 1px solid #FBEAFF;
+
+  @media (min-width: $desktop) {
+    min-width: 400px;
+  }
+}

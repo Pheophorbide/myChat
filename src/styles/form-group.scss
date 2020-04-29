@@ -1,0 +1,29 @@
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  &__label {
+    display: block;
+    padding-bottom: 5px;
+    font-size: 14px;
+  }
+
+  &__input {
+    color: #99879D;
+    background-color: #FBEEFF;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    outline: none;
+
+    &::placeholder {
+      color: rgba(112, 124, 151, 0.5);
+      font-size: 12px;
+    }
+  }
+
+  &__error {
+    color: $error;
+    font-size: 12px;
+  }
+}
