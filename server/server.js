@@ -2,6 +2,9 @@ const express = require('express');
 const path = require('path');
 const server = require('http').createServer();
 const io = require('socket.io')(server);
+const clientManagerHandlers = require('./clienManager');
+const clientManager = clientManagerHandlers();
+const {isUserNameUnavailable, registerUser, removeUser} = clientManager;
 
 const app = express();
 const port = 9001;
@@ -16,20 +19,24 @@ app.get('*', function (req, res) {
         }
     });
 });
+
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
 
-let users = [];
 let messages = [];
-let serverNames = [];
+let serverNames = new Map();
 
 io.on('connection', (socket) => {
     socket.on('SEND_USER', (name, callback) => {
-        users = [...users, name];
-        serverNames = [...serverNames, {socketId: socket.id, name}];
+        if (isUserNameUnavailable(name)) {
+            callback('Пользователь с таким именем уже существует!')
+        }
+        const users = registerUser(name);
+        serverNames.set(socket.id, name);
+
         socket.broadcast.emit('GET_USERS', users);
-        socket.emit('GET_USERS', users, callback);
+        socket.emit('GET_USERS', users, null, callback);
         socket.emit('SEND_MESSAGES', messages);
-        socket.broadcast.emit('SEND_MESSAGES', messages)
+        socket.broadcast.emit('SEND_MESSAGES', messages);
     });
 
     socket.on('SEND_MSG', props => {
@@ -39,15 +46,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('LOGOUT', (name) => {
-        users = users.filter((usr) => usr !== name);
-        serverNames = serverNames.filter((item) => item.name !== name);
+        const users = removeUser(name);
+        serverNames.delete(socket.id);
         socket.broadcast.emit('GET_USERS', users);
         socket.emit('GET_USERS', users);
     });
 
     socket.on('disconnect', () => {
-        serverNames = serverNames.filter(data => data.socketId !== socket.id);
-        users = serverNames.map(data => data.name);
+        if(!serverNames.has(socket.id)) return;
+        const users = removeUser(serverNames.get(socket.id));
         socket.broadcast.emit('GET_USERS', users);
         socket.emit('GET_USERS', users);
     });

@@ -7,6 +7,7 @@ import {RouteComponentProps, withRouter} from "react-router-dom";
 import {
     registerUser
 } from "../../api/server";
+import {store} from "react-notifications-component";
 
 interface LoginState {
     currentUser: string | null
@@ -16,10 +17,11 @@ class LoginComp extends PureComponent<{} & RouteComponentProps, LoginState> {
     constructor(props) {
         super(props);
 
-        this.setState({
+        this.state = {
             currentUser: null
-        })
+        }
     }
+
     onSubmit = (values) => {
         if (!values) return;
         const {name} = values;
@@ -30,10 +32,22 @@ class LoginComp extends PureComponent<{} & RouteComponentProps, LoginState> {
         });
     };
     
-    redirect = () => {
+    redirect = (error) => {
         const {history, dispatch} = this.props;
-        dispatch({type: 'SET_CURRENT_USER', payload: this.state.currentUser});
-        history.push("/home");
+
+        if(error) {
+            store.addNotification({
+                type: "danger",
+                message: error,
+                container: "top-right",
+                dismiss: {
+                    duration: 3000
+                }
+            })
+        } else {
+            dispatch({type: 'SET_CURRENT_USER', payload: this.state.currentUser});
+            history.push("/home");
+        }
     };
 
     render() {

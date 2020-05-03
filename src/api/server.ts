@@ -10,9 +10,9 @@ export const configureSocket = dispatch => {
         dispatch({type: 'IS_CONNECTED'})
     });
 
-    socket.on('GET_USERS', (users, callback) => {
+    socket.on('GET_USERS', (users, error, callback) => {
             dispatch({type: 'ADD_USERS', payload: users});
-            callback && callback();
+            callback && callback(error);
         }
     );
 
